@@ -1,0 +1,50 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:1.5.9.RELEASE")
+    }
+}
+
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'org.springframework.boot'
+
+
+// In this section you declare where to find the dependencies of your project
+repositories {
+    jcenter()
+    maven {url "https://oss.sonatype.org/content/repositories/snapshots"}
+}
+
+
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+dependencies {
+    compile("org.springframework.boot:spring-boot-starter-web:1.4.7.RELEASE")
+    compile('org.springframework.boot:spring-boot-starter:1.4.7.RELEASE')
+    compile 'org.springframework.boot:spring-boot-starter-ws:1.4.7.RELEASE'
+    compile('org.springframework:spring-context-support')
+    compile 'org.apache.camel:camel-core:2.20.1'
+    compile('org.apache.camel:camel-restlet:2.20.1')
+    compile('org.apache.camel:camel-spring:2.20.1')
+    compile('org.apache.camel:camel-jackson:2.20.1')
+    compile('org.apache.commons:commons-lang3:3.0')
+    compile 'org.springframework.boot:spring-boot-autoconfigure:1.5.9.RELEASE'
+    compile 'com.google.guava:guava:20.0'
+    compile 'org.knowm.xchange:xchange-core:4.3.2'
+    compile 'org.knowm.xchange:xchange-coinmarketcap:4.3.2'
+    compile 'org.knowm.xchange:xchange-coinbase:4.3.2'
+    compile 'org.knowm.xchange:xchange-bitstamp:4.3.2'
+    compile 'org.knowm.xchange:xchange-binance:4.3.2'
+    
+    //providedRuntime('org.springframework.boot:spring-boot-starter-tomcat')
+
+    // Use JUnit test framework
+    testCompile 'junit:junit:4.12'
+    testCompile('org.springframework.boot:spring-boot-starter-test')
+}
+
