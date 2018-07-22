@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package com.exchange.recent.rates;
 
@@ -8,10 +8,8 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
@@ -22,14 +20,19 @@ import org.knowm.xchange.binance.BinanceExchange;
 import org.knowm.xchange.binance.dto.marketdata.BinanceTicker24h;
 import org.knowm.xchange.binance.service.BinanceAccountService;
 import org.knowm.xchange.binance.service.BinanceMarketDataServiceRaw;
+import org.knowm.xchange.binance.service.BinanceTradeHistoryParams;
+import org.knowm.xchange.binance.service.BinanceTradeService;
 import org.knowm.xchange.bitstamp.BitstampExchange;
 import org.knowm.xchange.bitstamp.dto.marketdata.BitstampTicker;
 import org.knowm.xchange.bitstamp.service.BitstampAccountService;
 import org.knowm.xchange.bitstamp.service.BitstampMarketDataServiceRaw;
+import org.knowm.xchange.bitstamp.service.BitstampTradeService;
 import org.knowm.xchange.currency.Currency;
 import org.knowm.xchange.currency.CurrencyPair;
 import org.knowm.xchange.dto.account.Balance;
 import org.knowm.xchange.dto.account.Wallet;
+import org.knowm.xchange.dto.trade.UserTrade;
+import org.knowm.xchange.dto.trade.UserTrades;
 import org.knowm.xchange.service.marketdata.MarketDataService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -41,36 +44,36 @@ import com.exchange.recent.rates.domain.CustomBalance;
 
 /**
  * @author narendranjs
- *	
+ *
  */
 @RestController
 public class RatesComponent {
-	
+
 	@Value("${binance.apiKey}")
 	private String binanceApiKey;
-	
+
 	@Value("${binance.secretKey}")
 	private String binanceSecretKey;
-	
+
 	@Value("${binance.userId}")
 	private String binanceUserId;
-	
+
 	@Value("${bitstamp.apiKey}")
 	private String bitstampApiKey;
-	
+
 	@Value("${bitstamp.secretKey}")
 	private String bitstampSecretKey;
-	
+
 	@Value("${bitstamp.userId}")
 	private String bitstampUserId;
-	
-	
+
+
     @RequestMapping(value ="/greeting",method=RequestMethod.GET, produces="application/json")
     public List<CustomBalance> greeting() {
     	List<CustomBalance> binanceBalances = fetchBinanceDetails();
     	List<CustomBalance> bitStampBalances = fetchBitStampDetails();
     	List<CustomBalance> balances = new ArrayList<CustomBalance>();
-    	
+
     	balances.addAll(binanceBalances);
     	balances.addAll(bitStampBalances);
     	CustomBalance  balance = new CustomBalance();
@@ -84,18 +87,21 @@ public class RatesComponent {
 
 	private List<CustomBalance> fetchBitStampDetails() {
 		List<CustomBalance> balances = new ArrayList<CustomBalance>();
-		
+
 		Exchange bitStampExchange = getBitStampExchange();
 		BitstampAccountService accountService = (BitstampAccountService) bitStampExchange.getAccountService();
-		
+
 		Exchange tickerExchange = ExchangeFactory.INSTANCE.createExchange(BitstampExchange.class.getName());
+		BitstampTradeService binanceTradeService =  (BitstampTradeService) tickerExchange.getTradeService();
+
 		try {
+//			binanceTradeService.getTradeHistory(binanceTradeService.createTradeHistoryParams());
 			Wallet wallet = accountService.getAccountInfo().getWallet();
 			balances.addAll(processBitStampWallet(wallet, (BitstampExchange) tickerExchange));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
+
 		System.out.println("BitStamp : "+printTotalValue(balances));
 		return balances;
 	}
@@ -132,13 +138,14 @@ public class RatesComponent {
     	Exchange tickerExchange = ExchangeFactory.INSTANCE.createExchange(BinanceExchange.class.getName());
     	MarketDataService marketDataService = tickerExchange.getMarketDataService();
     	List<CustomBalance> balances = new ArrayList<CustomBalance>();
+
     	try {
 			Wallet wallet =  accountService.getAccountInfo().getWallet();
 			balances.addAll(processWallet(wallet, (BinanceMarketDataServiceRaw) marketDataService, (BinanceExchange) tickerExchange));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-    	System.out.println("Binance "+printTotalValue(balances));
+    	System.out.println("Binance : "+printTotalValue(balances));
 		return balances;
 	}
 
@@ -148,7 +155,7 @@ public class RatesComponent {
 			if (!StringUtils.equals("BTC", balance.getCurrencyCode())) {
 				totalValue = totalValue.add(balance.getTotalValue());
 			}
-		} 
+		}
 		return totalValue;
 	}
 
@@ -158,6 +165,11 @@ public class RatesComponent {
 		BinanceTicker24h binanceTicker24h = null;
 		BinanceTicker24h btcTicker = dataService.ticker24h(new CurrencyPair(Currency.BTC, Currency.USDT));
 		Set<CurrencyPair> entryset = binance.getExchangeMetaData().getCurrencyPairs().keySet();
+
+		BinanceTradeService binanceTradeService = (BinanceTradeService) binance.getTradeService();
+		BinanceTradeHistoryParams binanceTradeHistoryParams = (BinanceTradeHistoryParams) binanceTradeService.createTradeHistoryParams();
+		UserTrades userTrades = null;
+
 		for(Map.Entry<Currency, Balance> entry : map.entrySet()){
 			Balance balance = entry.getValue();
 			BigDecimal total =  balance.getTotal();
@@ -174,10 +186,13 @@ public class RatesComponent {
 //						System.out.println(currencyPair);
 			            binanceTicker24h =  dataService.ticker24h(currencyPair);
 //			            System.out.println("  "+binanceTicker24h.getLastPrice() +" -  " +binanceTicker24h.getCurrencyPair());
+			            //binanceTradeHistoryParams.setCurrencyPair(currencyPair);
+			            //userTrades = binanceTradeService.getTradeHistory(binanceTradeHistoryParams);
 			            break;
 			        }
 			    }
 				CustomBalance customBalance = convertToCustomBalance(balance);
+				//populate(customBalance,userTrades);
 				customBalance.setCurrentRate(null!=binanceTicker24h ? binanceTicker24h.getLastPrice() : BigDecimal.valueOf(1));
 				if(StringUtils.equals(customBalance.getCurrencyCode(), "BTC")){
 					customBalance.setTotalValue(customBalance.getAvailable().multiply(btcTicker.getLastPrice())
@@ -191,8 +206,17 @@ public class RatesComponent {
 				resultList.add(customBalance);
 			}
 		}
-		
+
 		return resultList;
+	}
+
+
+
+	private void populate(CustomBalance customBalance, UserTrades userTrades) {
+		for(UserTrade trade : userTrades.getUserTrades()){
+			System.out.println(trade.getOriginalAmount());
+		}
+
 	}
 
 	private CustomBalance convertToCustomBalance(Balance balance) {
@@ -210,7 +234,7 @@ public class RatesComponent {
     	binance.setSecretKey(binanceSecretKey);
     	return ExchangeFactory.INSTANCE.createExchange(binance);
 	}
-	
+
 	private Exchange getBitStampExchange(){
 		ExchangeSpecification bitStamp = new BitstampExchange().getDefaultExchangeSpecification();
 		bitStamp.setUserName(bitstampUserId);

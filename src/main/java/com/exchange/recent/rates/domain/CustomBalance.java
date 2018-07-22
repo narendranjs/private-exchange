@@ -7,6 +7,9 @@ public class CustomBalance {
 	BigDecimal total;
 	BigDecimal available;
 	BigDecimal currentRate;
+	BigDecimal initialRate;
+	BigDecimal investedAmount;
+	BigDecimal profit;
 	BigDecimal totalValue;
 	/**
 	 * @return the totalValue
@@ -68,13 +71,51 @@ public class CustomBalance {
 	public void setAvailable(BigDecimal available) {
 		this.available = available;
 	}
+	/**
+	 * @return the initialRate
+	 */
+	public BigDecimal getInitialRate() {
+		return initialRate;
+	}
+	/**
+	 * @param initialRate the initialRate to set
+	 */
+	public void setInitialRate(BigDecimal initialRate) {
+		this.initialRate = initialRate;
+	}
+	/**
+	 * @return the investedAmount
+	 */
+	public BigDecimal getInvestedAmount() {
+		return investedAmount;
+	}
+	/**
+	 * @param investedAmount the investedAmount to set
+	 */
+	public void setInvestedAmount(BigDecimal investedAmount) {
+		this.investedAmount = investedAmount;
+	}
+	/**
+	 * @return the profit
+	 */
+	public BigDecimal getProfit() {
+		return profit;
+	}
+	/**
+	 * @param profit the profit to set
+	 */
+	public void setProfit(BigDecimal profit) {
+		this.profit = profit;
+	}
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */
 	@Override
 	public String toString() {
-		return "CustomBalance [currencyCode=" + currencyCode + ", total=" + total + ", available=" + available
-				+ ", currentRate=" + currentRate + ", totalValue=" + totalValue + "]";
+		return "CustomBalance [currencyCode=" + currencyCode + ", available=" + available + ", currentRate="
+				+ currentRate + ", initialRate=" + initialRate + ", investedAmount=" + investedAmount + ", profit="
+				+ profit + ", totalValue=" + totalValue + "]";
 	}
+	
 	
 }
